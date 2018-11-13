@@ -1,9 +1,11 @@
 package com.yueou.MineInventory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ListIterator;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -37,7 +39,7 @@ public class MineInventoryHash {
     	return true;
     }
     
-    public boolean loadInventory(String playername,int size,String data,int []tool){
+    public boolean loadInventory(String playername,int size,String data,int []tool) throws IOException{
     	
     	String itemset[];
     	MineInventoryInventory minv;
@@ -51,23 +53,26 @@ public class MineInventoryHash {
     	
     	if(data==null||data=="")return false;
     	
-    	itemset = data.split(":");
+    	/*itemset = data.split(":");
     	int i,j,n;
     	for(i=0,j=0,n=0;i<itemset.length;i++,j++){
-    		int itemtype = Integer.parseInt(itemset[i]);
+    		String itemtype = itemset[i];
     		
-    		if(itemtype!=0)n++;
+    		if(itemtype!=null)n++;
     		
-    		item = new ItemStack(itemtype);
+    		item = new ItemStack(Material.getMaterial(itemtype));
     		i++;
     		
     		item.setAmount(Integer.parseInt(itemset[i]));
         	minv.getInventory().setItem(j, item); 
     	}
+    	*/
     	
+    	if(!minv.setInventory(InventorySerizer.fromBase64(data)))
+        	System.out.println("[MineInventory]: Inventory of "+ playername+" loaded failed.");
     	this.addInventory(playername.toLowerCase(), minv);
     	
-    	System.out.println("[MineInventory]: Inventory of "+ playername+" loaded, " + n +" Items has.");
+    	System.out.println("[MineInventory]: Inventory of "+ playername+" loaded.");
     	
     	return true;
     }
@@ -93,29 +98,29 @@ public class MineInventoryHash {
     
     public static String getInventoryInfo(Inventory inv){
     	
-    	String invinfo = "";
-    	ListIterator<ItemStack> invlist = inv.iterator();
+    	String invinfo = InventorySerizer.toBase64(inv);
+    	/*ListIterator<ItemStack> invlist = inv.iterator();
     	ItemStack is;
     	
 		while(invlist.hasNext()){
 			is = invlist.next();
 			if(is==null){
 				if(invinfo.compareTo("")==0){
-					invinfo = invinfo+"0:0";
+					invinfo = invinfo+Material.AIR.toString()+":0";
 				}
 				else{
-					invinfo=invinfo+":0:0";
+					invinfo=invinfo+":"+Material.AIR.toString()+":0";
 				}				
 			}
 			else{
 				if(invinfo.compareTo("")==0){
-					invinfo = invinfo+is.getTypeId()+":"+is.getAmount();
+					invinfo = invinfo+is.getType().toString()+":"+is.getAmount();
 				}
 				else{
-					invinfo=invinfo+":"+is.getTypeId()+":"+is.getAmount();
+					invinfo=invinfo+":"+is.getType().toString()+":"+is.getAmount();
 				}				
 			}
-		}
+		}*/
     	return invinfo;
     }
     

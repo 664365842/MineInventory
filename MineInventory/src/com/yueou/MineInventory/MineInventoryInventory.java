@@ -47,6 +47,15 @@ public class MineInventoryInventory implements InventoryHolder{
 		return minventory;
 	}
 	
+	public boolean setInventory(Inventory inv) {
+		if(inv.getSize()==minventory.getSize()) {
+			minventory = inv;
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
 	
 	public String getOwner(){
 		return playername;
@@ -95,7 +104,8 @@ public class MineInventoryInventory implements InventoryHolder{
 	
 	
 	public void sortInventory(){
-		ItemStack temp = null;
+		//   id失效 排序不存在的
+		/*ItemStack temp = null;
 		
 		ListIterator<ItemStack> itemlist = minventory.iterator();
 		ArrayList<ItemStack> itemarray = new ArrayList<ItemStack>();
@@ -112,7 +122,6 @@ public class MineInventoryInventory implements InventoryHolder{
 		for(i=0;i<amount;i++){
 			min = 0;
 			for(j=1;j<amount-i;j++){
-				
 				if(itemarray.get(min).getTypeId()>itemarray.get(j).getTypeId()){
 					min = j;
 				}
@@ -125,7 +134,7 @@ public class MineInventoryInventory implements InventoryHolder{
 		amount = newitemarray.size();
 		for(i=0;i<amount;i++){
 			minventory.addItem(newitemarray.get(i));
-		}
+		}*/
 		
 	}
 

@@ -16,13 +16,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
  
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
- 
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
+
+
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
  
 public class MineInventory extends JavaPlugin{
 	
@@ -36,9 +37,14 @@ public class MineInventory extends JavaPlugin{
     private MineInventoryCommandExecutor executor;
     private MineInventoryHash mineinventorymap;
     private MineInventoryListener mineinventorylistener;
-    private static PermissionHandler permHandler;
+    //private static PermissionHandler permHandler;
     private MineInventoryCommandHash commandmap;
     private MineInventorySignListener signlistener;
+    
+
+	public static Permission permission = null;
+	public static Economy economy = null;
+	
 
     @Override
     public void onEnable()
@@ -71,7 +77,9 @@ public class MineInventory extends JavaPlugin{
             
             signlistener = new MineInventorySignListener(this);
             
+            checkVault();
             setupPerms();
+            setupEconomy();
             
             PluginManager pm = this.getServer().getPluginManager();
             pm.registerEvents(mineinventorylistener, this);
@@ -81,7 +89,12 @@ public class MineInventory extends JavaPlugin{
             getCommand("mi").setExecutor(executor);
             
             PluginDescriptionFile pdfFile = this.getDescription();
-            loadInventory();
+            try {
+				loadInventory();
+			} catch (IOException e) {
+				// TODO 自动生成的 catch 块
+				e.printStackTrace();
+			}
             log.info("MineInventory v" + pdfFile.getVersion() + " by yueou loaded.");
     }
     
@@ -109,12 +122,17 @@ public class MineInventory extends JavaPlugin{
         commandmap = new MineInventoryCommandHash();        
         signlistener = new MineInventorySignListener(this); 
         
-        setupPerms();
+        //setupPerms();
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(mineinventorylistener, this);        
         getCommand("mi").setExecutor(executor);
         PluginDescriptionFile pdfFile = this.getDescription();
-        loadInventory();
+        try {
+			loadInventory();
+		} catch (IOException e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+		}
         log.info("MineInventory v" + pdfFile.getVersion() + " by yueou reloaded.");
     }
     
@@ -179,11 +197,24 @@ public class MineInventory extends JavaPlugin{
 	   }
         
    }
-
+    private void checkVault() {
+		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
+			this.log.warning("未找到vault!插件禁用中.");
+			this.setEnabled(false);
+			return;
+		}
+    }
     
     private void setupPerms()
     {
-    	if (permHandler != null) {
+		RegisteredServiceProvider<Permission> permissionProvider = getServer()
+				.getServicesManager().getRegistration(
+						net.milkbowl.vault.permission.Permission.class);
+		if (permissionProvider != null) {
+			permission = permissionProvider.getProvider();
+		}
+		
+    	/*if (permHandler != null) {
             return;
         }
         
@@ -195,8 +226,19 @@ public class MineInventory extends JavaPlugin{
         }
         
        permHandler = ((Permissions) permissionsPlugin).getHandler();
-        log.info("[MineInventory] Permission system found. Will use plugin "+((Permissions)permissionsPlugin).getDescription().getFullName());
+        log.info("[MineInventory] Permission system found. Will use plugin "+((Permissions)permissionsPlugin).getDescription().getFullName());*/
     }
+    
+	private boolean setupEconomy() {
+		RegisteredServiceProvider<Economy> economyProvider = getServer()
+				.getServicesManager().getRegistration(
+						net.milkbowl.vault.economy.Economy.class);
+		if (economyProvider != null) {
+			economy = economyProvider.getProvider();
+		}
+
+		return (economy != null);
+	}
     
     public MineInventoryHash getMap(){
     	
@@ -236,9 +278,9 @@ public class MineInventory extends JavaPlugin{
     	return username;
     }
     
-    public PermissionHandler getPermissionHandler()
+    public  Permission getPermissionHandler()
     {
-    	return permHandler;
+    	return permission;
     }
     
     public MineInventoryConfigReader getreader(){
@@ -251,7 +293,7 @@ public class MineInventory extends JavaPlugin{
     	return commandmap;
     }
     
-    public void loadInventory(){
+    public void loadInventory() throws IOException{
     	
     	System.out.println("[MineInventory]DataBase connected,Inventory loading..");
     	String sql = "Select * From prefix_InventoryData;";

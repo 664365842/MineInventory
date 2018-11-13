@@ -12,7 +12,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
 
-import com.iCo6.system.Account;
+import net.milkbowl.vault.economy.Economy;
+
+
 
 public class MineInventoryCommandExecutor implements CommandExecutor{
 
@@ -38,13 +40,12 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
         Player player = null;
         String playername = null;
        	
-       	Account account = null;
+       	Economy account = MineInventory.economy;
        	
         if(cmder instanceof Player)
         {
                 player = (Player)cmder;
                 playername = cmder.getName();
-                account = new Account(playername);
         }
         else return false;
         
@@ -245,8 +246,9 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
                       		 player.sendMessage("你还没有扩展背包");
                       		 return true;
                       	}
-                      	
-                      	if(!(inventorymap.getInventory(playername).canSort()||plugin.getPermissionHandler().has(player, "mi.admin"))){
+                      	player.sendMessage("排序功能在1.13不可用"); //不可用
+                      	return true;
+                      	/*if(!(inventorymap.getInventory(playername).canSort()||plugin.getPermissionHandler().has(player, "mi.admin"))){
                       		player.sendMessage("你还没有购买扩展功能: "+ChatColor.GREEN +"智能背包");
                       	}
         				player.sendMessage("已将背包内物品按照物品ID进行整理排序.");
@@ -254,7 +256,7 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
         				plugin.getMap().getInventory(playername).sortInventory();
         				plugin.getMap().saveInventory(playername);
         				
-        				return true;
+        				return true;*/
         			}
         			else if(args[0].equalsIgnoreCase("tochest")){
                         if (!(plugin.getPermissionHandler().has(player, "mi.use"))) 
@@ -333,12 +335,12 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
                         
         				else if(lastcmd.equalsIgnoreCase("create")){
         					
-                     		 if(account.getHoldings().getBalance()<createprice){
+                     		 if(account.getBalance(player)<createprice){
                     			 player.sendMessage("你的金钱不足");
                     			 cm.removeLastCommand(playername);
                     			 return true;
                     		 }
-                    		 account.getHoldings().subtract(createprice);
+                    		 account.withdrawPlayer(player,createprice);
                     		 
                     		 boolean res = inventorymap.addInventory(playername, 18);
                     		 
@@ -392,7 +394,7 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
                                  player.sendMessage("你没有使用扩展背包的权限.");
                                  return true;
                             }       		
-	                		if(account.getHoldings().getBalance()<luprice){
+	                		if(account.getBalance(player)<luprice){
 	                			player.sendMessage("你的金钱不足");
 	                			cm.removeLastCommand(playername);
 	                			return true;
@@ -650,22 +652,22 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
                         args[1]=args[1].toUpperCase();
                         int len = args[1].length();
                         	
-                        if(Material.getMaterial(args[1])==null){
+                        if(Material.matchMaterial(args[1])==null){
                         	stat = false;
-                        	for(int j=0;j<len;j++){
-                        		char c = args[1].charAt(j);
-                        		if(c>'9'||c<'0'){
+                        	//for(int j=0;j<len;j++){
+                        	//	char c = args[1].charAt(j);
+                        	//	if(c>'9'||c<'0'){
                                 	player.sendMessage("没有找到物品  " + args[1]);
-                                	return true;
-                        		}
+                            //    	return true;
+                        		//}
                         	}
-                        	itemid = Integer.parseInt(args[1]);
-                        	if(Material.getMaterial(itemid)==null){
+                        	//itemid = Integer.parseInt(args[1]);
+                        	//if(Material.getMaterial(itemid)==null){
 
-                            	player.sendMessage("没有找到物品  " + args[1]);
-                            	return true;
-                        	}
-                        }
+                            //	player.sendMessage("没有找到物品  " + args[1]);
+                            //	return true;
+                        	//}
+                       // }    1.13不支持id查找
                         else{
                         	stat = true;
                         }
@@ -679,7 +681,7 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
                         if(stat == false){
                             
                             for(int i=0;i<size;i++){
-                        		item = new ItemStack(itemid);
+                        		item = new ItemStack(Material.AIR);
                         		item.setAmount(64);
                         		inv.setItem(i, item);
                             }
