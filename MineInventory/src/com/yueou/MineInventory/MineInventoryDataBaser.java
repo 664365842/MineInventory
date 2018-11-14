@@ -43,7 +43,9 @@ public class MineInventoryDataBaser{
 	    }
 	    catch(SQLException e)
 	    {
+	    	
 	            System.out.println("[MineInventory]: 连接数据库发生错误,请检查你的配置文件");
+	    	    System.out.println(e.getMessage());
 	            plugin.onDisable();
 	    }
 	    createTable();
@@ -76,7 +78,7 @@ public class MineInventoryDataBaser{
                                                 "CanSend Tinyint DEFAULT 0, " + 
                                                 "Pre1 Tinyint DEFAULT 0, " + 
                                                 "Pre2 Tinyint DEFAULT 0, " +
-                                                "invData Varchar(800) DEFAULT '0:0');";
+                                                "invData BLOB DEFAULT '0:0');";
                                 query.executeUpdate(sqlcre);
                         }
                         

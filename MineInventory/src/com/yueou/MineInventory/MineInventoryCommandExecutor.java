@@ -1,6 +1,7 @@
 package com.yueou.MineInventory;
 
 import java.util.ListIterator;
+import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -35,7 +36,7 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
 		// TODO Auto-generated method stub
 		
 		float createprice = plugin.getreader().getCreatePrice();		
-		float luprice = plugin.getreader().getUpdatePrice();
+		Map<Integer,Float> luprice = plugin.getreader().getUpdatePrice();
 		
         Player player = null;
         String playername = null;
@@ -139,9 +140,9 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
         			}
         			else if(args[0].equalsIgnoreCase("levelup")){
         				
-                        if (!(plugin.getPermissionHandler().has(player, "mi.admin"))) 
+                        if (!(plugin.getPermissionHandler().has(player, "mi.use"))) 
                         {
-                            player.sendMessage("权限不足.");
+                            player.sendMessage("你没有使用扩展背包的权限.");
                             return true;
                         } 
                         
@@ -156,10 +157,9 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
 	                   		player.sendMessage("你的背包已经是最大的了, 无法继续升级");
 	                   		return true;
 	                   	}
-	                   	
-
-	                   	
-	                   	player.sendMessage("升级背包将会花费你" + luprice + "元, 确认升级请输入/mi confirm");
+	                   	float lvlprice = luprice.get(invsize+9);
+	                   	player.sendMessage("当前背包容量为 "+invsize+" 格,下一等级背包容量为 "+(invsize+9)+" 格.");
+	                   	player.sendMessage("升级背包将会花费你" + lvlprice + "元, 确认升级请输入/mi confirm");
 	                   	
 	                   	plugin.getCommandMap().setLastCommand(cmder.getName(), args[0]);
 	                   
@@ -393,15 +393,18 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
                             {
                                  player.sendMessage("你没有使用扩展背包的权限.");
                                  return true;
-                            }       		
-	                		if(account.getBalance(player)<luprice){
+                            }      
+            				MineInventoryInventory inv = inventorymap.getInventory(playername); 
+            				float lvlprice=luprice.get(inv.getInventory().getSize()+9);
+            				if(account.getBalance(player)<lvlprice){
 	                			player.sendMessage("你的金钱不足");
 	                			cm.removeLastCommand(playername);
 	                			return true;
 	                		}
-	                		MineInventoryInventory inv = inventorymap.getInventory(playername); 
+	                		
 	                		
 		                   	ListIterator<ItemStack> itemlist = inv.getInventory().iterator();
+		                   	//TODO 增加层级
 		                   	MineInventoryInventory newinventory = new MineInventoryInventory(playername,54);
 		                   	Inventory newinv = newinventory.getInventory();
 		                   	
@@ -432,15 +435,19 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
         				player.sendMessage("查看 MineInventory 的玩家命令:");
         				player.sendMessage("/mi create : 为自己创建一个扩展背包");
         				player.sendMessage("/mi open : 打开自己的扩展背包");
-        				player.sendMessage("/mi sort : 将扩展背包里的物品按照物品ID进行排序和整理("+ChatColor.GREEN+"智能背包 "+ChatColor.WHITE+")");
+        				//player.sendMessage("/mi sort : 将扩展背包里的物品按照物品ID进行排序和整理("+ChatColor.GREEN+"智能背包 "+ChatColor.WHITE+")");
         				player.sendMessage("/mi remove(delete) : 删除自己的扩展背包");
+        				player.sendMessage("/mi levelup : 给自己的扩展背包扩容");
         				player.sendMessage("/mi tochest : 将扩展背包里的东西转移到目标箱子中("+ChatColor.GREEN+"快速装箱 "+ChatColor.WHITE+")");
         				player.sendMessage("/mi topack : 将目标箱子里的东西转移到扩展背包中( "+ChatColor.GREEN+"快速装箱"+ChatColor.WHITE+")");
         				player.sendMessage("/mi drop : 将扩展背包里的东西全部扔到地下("+ChatColor.GREEN+"背包上的洞 "+ChatColor.WHITE+")");
         				player.sendMessage("/mi send <玩家名> : 将扩展背包内的东西发送到别人的扩展背包("+ChatColor.GREEN+"物品发射器 "+ChatColor.WHITE+")");
         				player.sendMessage("/mi help : 查看所有普通命令");
+        				if ((plugin.getPermissionHandler().has(player, "mi.admin"))) 
+                        {
         				player.sendMessage("/mi adminhelp : 查看所有命令");
-        				player.sendMessage("MineInventory 版本号 v" + plugin.getDescription().getVersion() + " Author by yueou");
+                        }
+        				player.sendMessage("MineInventory 版本号 v" + plugin.getDescription().getVersion() + " Author by yueou,fixed by 664");
         				return true;
         			}        			
         			else if(args[0].equalsIgnoreCase("adminhelp")){
@@ -454,7 +461,7 @@ public class MineInventoryCommandExecutor implements CommandExecutor{
         				player.sendMessage("查看 MineInventory 的所有命令:");
         				player.sendMessage("/mi create : 为自己创建一个扩展背包");
         				player.sendMessage("/mi open : 打开自己的扩展背包");
-        				player.sendMessage("/mi sort : 将扩展背包里的物品按照物品ID进行排序和整理");
+        				//player.sendMessage("/mi sort : 将扩展背包里的物品按照物品ID进行排序和整理");
         				player.sendMessage("/mi remove(delete) : 删除自己的扩展背包");
         				player.sendMessage("/mi levelup : 给自己的扩展背包扩容");
         				player.sendMessage("/mi tochest : 将扩展背包里的东西转移到目标箱子中");

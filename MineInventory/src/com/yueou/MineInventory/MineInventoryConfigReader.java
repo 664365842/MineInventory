@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 
 public class MineInventoryConfigReader {
@@ -18,7 +19,9 @@ public class MineInventoryConfigReader {
      private String pre;
      private File config = new File("plugins" + File.separatorChar + "MineInventory" + File.separatorChar + "MineInventory.properties");
      private float createprice;
-     private float updateprice;
+     //private float updateprice;
+     private Map<Integer,Float> updateprice;
+     
      
     public MineInventoryConfigReader()
      {
@@ -60,9 +63,13 @@ public class MineInventoryConfigReader {
                         {
                         		createprice = Float.parseFloat(thisLine.replace("InventoryCreatePrice=", ""));
                         }
-                        else if(thisLine.contains("InventoryLevelupPrice"))
+                        else if(thisLine.contains("InventoryLevelupPrice:"))
                         {
-                        		updateprice = Float.parseFloat(thisLine.replace("InventoryLevelupPrice=", ""));
+                        	while((thisLine = read.readLine()) != null) {
+                        		String[] s1=thisLine.split(":");
+                        		updateprice.put(Integer.parseInt(s1[0]), Float.parseFloat(s1[1]));
+                        	}
+                        	//updateprice = Float.parseFloat(thisLine.replace("InventoryLevelupPrice=", ""));
                         }
                 }
                 read.close();
@@ -110,7 +117,7 @@ public class MineInventoryConfigReader {
              return createprice;
      }
      
-     public float getUpdatePrice()
+     public Map<Integer,Float> getUpdatePrice()
      {
              return updateprice;
      }    
